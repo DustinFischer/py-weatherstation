@@ -1,0 +1,93 @@
+substitutions:
+  device_name: dht11
+  friendly_name: dht11
+  device_id: b10197e8_bdc5_11ed_afa1_0242ac120002
+  time_id: homeassistant_time
+
+esphome:
+  name: "environment"
+#  on_boot:
+#    if:
+#      condition:
+#        time.has_time:
+#      then:
+#        - logger.log: Time has been set and is valid!
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+time:
+  - platform: homeassistant
+    id: ${time_id}
+    timezone: Africa/Johannesburg
+    on_time:
+      # Every 1 minute
+      - seconds: 0
+        minutes: /1
+        then:
+          - # publish weather data to MQTT topic
+          - mqtt.publish_json:
+              topic: sensor/weather/ambient/reading
+              payload: |-
+                root["id"] = "${device_id}";
+                root["eventTs"] = id(${time_id}).timestamp_now();
+                root["temperature"] = id(${device_id}_temp).state;
+                root["humidity"] = id(${device_id}_humid).state;
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "Fxrd/DvnOzlFKJcCjIFN3wIPoyZM8ztWVNC14NsdlDE="
+
+ota:
+  password: "1e8d414b457fec661ed769ec370213de"
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Atmosphere Fallback Hotspot"
+
+    password: "TxsutQhImQKm"
+
+captive_portal:
+
+sensor:
+  - platform: dht
+    pin: GPIO23
+    model: DHT11
+    update_interval: 60s
+
+    humidity:
+      name: "Ambient Humidity"
+      id: "${device_id}_humid"
+
+    temperature:
+      name: "Ambient Temperature"
+      id: "${device_id}_temp"
+
+mqtt:
+  # note there are logging topics etc, see MQTT componet ESP32
+  topic_prefix: environment/weather   # will prodcue readings by default to a state topic: <prefix>/<component_type>/<component_name>/state
+  discovery: false
+  broker: 192.168.0.163  # NB this is the ip of the server serving mosquitto broker, in this case it is my Mac's IP address (get from wifi info)
+  port: 1883
+  username: admin
+  password: admin
+#  name: "Component Name"
+#  # Optional variables:
+#  retain: true
+#  availability:
+#    topic: livingroom/status
+#    payload_available: online
+#    payload_not_available: offline
+#  state_topic: livingroom/custom_state_topic
+#  command_topic: livingroom/custom_command_topic
+#  command_retain: false

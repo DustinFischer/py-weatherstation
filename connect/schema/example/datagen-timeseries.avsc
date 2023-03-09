@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "datagentimeseries",
+  "fields": [
+    {
+      "name": "value",
+      "type": "string",
+      "arg.properties": {
+        "iteration": {
+          "start": 0
+        }
+      }
+    }
+  ]
+}
