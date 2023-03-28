@@ -1,17 +1,19 @@
 substitutions:
   device_name: dht11
   friendly_name: dht11
-  device_id: b10197e8_bdc5_11ed_afa1_0242ac120002
   time_id: homeassistant_time
+  collection: weatherstation
+  collection_id: "1"
+  device_id: 04a601d259ed428e856194a00ab981b9
 
 esphome:
   name: "environment"
-#  on_boot:
-#    if:
-#      condition:
-#        time.has_time:
-#      then:
-#        - logger.log: Time has been set and is valid!
+  on_boot:
+    if:
+      condition:
+        time.has_time:
+      then:
+        - logger.log: Time has been set and is valid!
 
 esp32:
   board: esp32dev
@@ -24,17 +26,29 @@ time:
     timezone: Africa/Johannesburg
     on_time:
       # Every 1 minute
-      - seconds: 0
-        minutes: /1
+      - seconds: /2
+#        minutes:
         then:
-          - # publish weather data to MQTT topic
+          # publish weather data to MQTT topic
           - mqtt.publish_json:
-              topic: sensor/weather/ambient/reading
+              topic: ${collection}/${collection_id}/humiture/${device_id}/state
               payload: |-
-                root["id"] = "${device_id}";
                 root["eventTs"] = id(${time_id}).timestamp_now();
-                root["temperature"] = id(${device_id}_temp).state;
-                root["humidity"] = id(${device_id}_humid).state;
+                root["deviceID"] = "${device_id}";
+                root["temperature"] = id(t${device_id}).state;
+                root["humidity"] = id(h${device_id}).state;
+
+#                JsonObject schema = root.createNestedObject("schema");
+#                schema["type"] = "struct";
+#                JsonArray fields = schema.createNestedArray("fields");
+#                JsonObject field_id = fields.createNestedObject();
+#                field_id["type"] = "string";
+#                field_id["optional"] = false;
+#                field_id["field"] = "id";
+#                JsonObject payload = root.createNestedObject("payload");
+#                payload["id"] = "${device_id}";
+
+
 
 # Enable logging
 logger:
@@ -67,15 +81,15 @@ sensor:
 
     humidity:
       name: "Ambient Humidity"
-      id: "${device_id}_humid"
+      id: "h${device_id}"
 
     temperature:
       name: "Ambient Temperature"
-      id: "${device_id}_temp"
+      id: "t${device_id}"
 
 mqtt:
   # note there are logging topics etc, see MQTT componet ESP32
-  topic_prefix: environment/weather   # will prodcue readings by default to a state topic: <prefix>/<component_type>/<component_name>/state
+  topic_prefix: weatherstation   # will prodcue readings by default to a state topic: <prefix>/<component_type>/<component_name>/state
   discovery: false
   broker: 192.168.0.163  # NB this is the ip of the server serving mosquitto broker, in this case it is my Mac's IP address (get from wifi info)
   port: 1883
