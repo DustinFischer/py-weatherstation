@@ -11,7 +11,7 @@ $ esphome run --device /dev/cu.usbserial-11420 /path/to/eshphome/config/file
 
 ### Mosquitto and Kafka
 
-1. install and run dependedncies:
+1. install and run dependencies:
 ```
 $ docker compose up -d deps
 ```
@@ -27,10 +27,16 @@ $ curl localhost:8083/connector-plugins
 
 4. install connector
 ```
-$ curl -XPOST -d @path/to/connector/config.conf "Content-Type: application/json" http://localhost:8083/connectors | jq '.'
+$ curl -XPOST -d @path/to/connector/config.conf -H "Content-Type: application/json" http://localhost:8083/connectors | jq '.'
+```
+
+5. Verify the connector is installed and running
+```
+$ curl localhost:8083/connectors/<connector_name>/status | jq '.'
 ```
 
 #### HomeAssistant
+
 Dashboard:
 ```
 $ localhost:8123
