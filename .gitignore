@@ -1,1 +1,12 @@
+# files
+.python-version
+.env
+.installations/
+
+# dirs
+venv/
+log/
+
+# misc
 .idea/
+__pycache__

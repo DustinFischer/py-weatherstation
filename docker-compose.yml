@@ -85,8 +85,8 @@ services:
       SCHEMA_REGISTRY_TOPIC_REPLICATION_FACTOR: 1
 
   connect:
-    #    image: confluentinc/cp-kafka-connect
-    image: cnfldemos/cp-server-connect-datagen:0.5.3-7.1.0
+    image: confluentinc/cp-kafka-connect:7.3.2
+#    image: cnfldemos/cp-server-connect-datagen:0.5.3-7.1.0
     hostname: connect
     #    container_name: connect
     depends_on:
@@ -124,12 +124,13 @@ services:
     command: sh -c "exit 0"
     restart: "no"
     depends_on:
+      - homeassistant
+      - mosquitto
       - zookeeper
       - kafka
       - schema-registry
       - connect
-      - mosquitto
-      - homeassistant
+
 
 volumes:
   mosquittodata:
